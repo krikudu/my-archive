@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>الأرشيف — معرض دائم</title>
+<style>
+  :root{
+    --bg:#141311;
+    --panel:#1c1a17;
+    --panel2:#242220;
+    --line:#38352f;
+    --line2:#4a4640;
+    --ink:#f2ede2;
+    --ink-dim:#a9a294;
+    --ink-faint:#726c60;
+    --accent:#d8a24a;
+    --accent-dim:#7a5c28;
+    --danger:#c25c4e;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Georgia','Iowan Old Style',serif;
+    min-height:100vh;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:28px 20px 80px;}
+  header{
+    display:flex;justify-content:space-between;align-items:flex-end;
+    border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:26px;
+    flex-wrap:wrap;gap:12px;
+  }
+  .brand h1{
+    font-size:26px;font-weight:400;margin:0;letter-spacing:.5px;
+  }
+  .brand p{margin:4px 0 0;color:var(--ink-dim);font-size:13px;font-family:sans-serif;}
+  .stats{display:flex;gap:22px;font-family:sans-serif;}
+  .stat{text-align:center;}
+  .stat b{display:block;font-size:20px;font-weight:600;color:var(--accent);}
+  .stat span{font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.06em;}
+
+  .panel{
+    background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:18px 20px;margin-bottom:22px;
+  }
+  .panel h2{font-size:14px;font-weight:600;margin:0 0 12px;font-family:sans-serif;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.06em;}
+  .addform{display:flex;gap:10px;flex-wrap:wrap;}
+  .addform input[type=text], .addform input[type=url]{
+    flex:1;min-width:220px;background:var(--panel2);border:1px solid var(--line2);
+    color:var(--ink);padding:10px 12px;border-radius:6px;font-family:sans-serif;font-size:14px;
+  }
+  .addform input::placeholder{color:var(--ink-faint);}
+  .addform select{
+    background:var(--panel2);border:1px solid var(--line2);color:var(--ink);
+    padding:10px 12px;border-radius:6px;font-family:sans-serif;font-size:14px;
+  }
+  .row2{display:flex;gap:10px;width:100%;flex-wrap:wrap;margin-top:10px;}
+  button{
+    cursor:pointer;border-radius:6px;font-family:sans-serif;font-size:13px;
+    border:1px solid var(--line2);background:var(--panel2);color:var(--ink);
+    padding:9px 16px;transition:background .15s, transform .1s;
+  }
+  button:hover{background:#2c2925;}
+  button:active{transform:scale(0.97);}
+  .btn-main{background:var(--accent-dim);border-color:var(--accent);color:#fff2d9;}
+  .btn-main:hover{background:#8a6830;}
+
+  .toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
+  .filters{display:flex;gap:8px;flex-wrap:wrap;}
+  .chip{
+    font-family:sans-serif;font-size:12px;padding:6px 12px;border-radius:20px;
+    border:1px solid var(--line2);background:transparent;color:var(--ink-dim);cursor:pointer;
+  }
+  .chip.active{background:var(--accent-dim);border-color:var(--accent);color:#fff2d9;}
+  .search{
+    background:var(--panel2);border:1px solid var(--line2);color:var(--ink);
+    padding:8px 12px;border-radius:6px;font-family:sans-serif;font-size:13px;min-width:180px;
+  }
+
+  .grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;
+  }
+  .card{
+    background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;
+    display:flex;flex-direction:column;
+  }
+  .thumb{
+    background:#000;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;
+    position:relative;overflow:hidden;
+  }
+  .thumb img, .thumb video{width:100%;height:100%;object-fit:cover;}
+  .fav-btn{
+    position:absolute;top:8px;left:8px;background:rgba(20,19,17,.7);border:none;
+    border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;
+    color:#f2ede2;font-size:15px;
+  }
+  .fav-btn.active{color:var(--accent);}
+  .card-body{padding:10px 12px 12px;display:flex;flex-direction:column;gap:6px;flex:1;}
+  .card-title{font-size:13px;font-family:sans-serif;font-weight:600;color:var(--ink);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .card-tags{display:flex;flex-wrap:wrap;gap:4px;}
+  .tag{font-family:sans-serif;font-size:10px;background:var(--panel2);color:var(--ink-dim);
+    padding:2px 8px;border-radius:10px;border:1px solid var(--line);}
+  .card-actions{display:flex;gap:6px;margin-top:auto;padding-top:6px;}
+  .card-actions button{flex:1;padding:6px 8px;font-size:11px;}
+  .icon-del{color:var(--danger);}
+
+  .empty{
+    text-align:center;padding:60px 20px;color:var(--ink-faint);font-family:sans-serif;
+  }
+  .empty h3{font-family:'Georgia',serif;color:var(--ink-dim);font-weight:400;font-size:18px;margin-bottom:6px;}
+
+  .modal-bg{
+    position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;
+    align-items:center;justify-content:center;z-index:50;padding:20px;
+  }
+  .modal-bg.open{display:flex;}
+  .modal{
+    background:var(--panel);border:1px solid var(--line2);border-radius:10px;
+    padding:20px;max-width:420px;width:100%;
+  }
+  .modal h3{margin:0 0 12px;font-family:sans-serif;font-size:15px;color:var(--ink);}
+  .modal input{
+    width:100%;background:var(--panel2);border:1px solid var(--line2);color:var(--ink);
+    padding:9px 12px;border-radius:6px;font-family:sans-serif;font-size:13px;margin-bottom:10px;
+  }
+  .col-list{max-height:160px;overflow:auto;margin-bottom:10px;}
+  .col-item{display:flex;align-items:center;gap:8px;padding:6px 0;font-family:sans-serif;font-size:13px;}
+  .modal-actions{display:flex;justify-content:flex-end;gap:8px;}
+
+  .toast{
+    position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+    background:var(--panel2);border:1px solid var(--line2);color:var(--ink);
+    padding:10px 18px;border-radius:8px;font-family:sans-serif;font-size:13px;
+    opacity:0;pointer-events:none;transition:opacity .25s;z-index:100;
+  }
+  .toast.show{opacity:1;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <h1>الأرشيف</h1>
+      <p>معرض دائم لصورك وفيديوهاتك — لا تضيع مهما بدّلت الحساب</p>
+    </div>
+    <div class="stats">
+      <div class="stat"><b id="statTotal">0</b><span>عناصر</span></div>
+      <div class="stat"><b id="statFav">0</b><span>مفضلة</span></div>
+      <div class="stat"><b id="statCol">0</b><span>قوائم</span></div>
+    </div>
+  </header>
+
+  <div class="panel">
+    <h2>إضافة عنصر جديد</h2>
+    <div class="addform">
+      <input type="url" id="inUrl" placeholder="الصق رابط الصورة أو الفيديو هنا">
+      <select id="inType">
+        <option value="auto">كشف تلقائي</option>
+        <option value="image">صورة</option>
+        <option value="video">فيديو</option>
+      </select>
+    </div>
+    <div class="row2">
+      <input type="text" id="inTitle" placeholder="عنوان أو وصف قصير (اختياري)">
+      <button class="btn-main" id="btnAdd">حفظ في الأرشيف</button>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="filters" id="filterChips">
+      <button class="chip active" data-filter="all">الكل</button>
+      <button class="chip" data-filter="fav">المفضلة</button>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <input class="search" id="searchBox" placeholder="بحث بالعنوان...">
+      <button id="btnNewCollection">+ قائمة جديدة</button>
+    </div>
+  </div>
+
+  <div id="gridArea"></div>
+</div>
+
+<div class="modal-bg" id="collectionModal">
+  <div class="modal">
+    <h3 id="modalTitle">أضف إلى قائمة</h3>
+    <div class="col-list" id="colList"></div>
+    <input type="text" id="newColName" placeholder="اسم قائمة جديدة">
+    <div class="modal-actions">
+      <button id="btnCreateCol">إنشاء وإضافة</button>
+      <button id="btnCloseModal">تم</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let items = [];
+let collections = [];
+let activeFilter = 'all';
+let searchTerm = '';
+let modalItemId = null;
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 1800);
+}
+
+function detectType(url){
+  const u = url.toLowerCase().split('?')[0];
+  if(u.match(/\.(mp4|webm|mov|m4v)$/)) return 'video';
+  return 'image';
+}
+
+async function loadData(){
+  try{
+    const res = await window.storage.get('archive-items');
+    items = res ? JSON.parse(res.value) : [];
+  }catch(e){ items = []; }
+  try{
+    const res2 = await window.storage.get('archive-collections');
+    collections = res2 ? JSON.parse(res2.value) : [];
+  }catch(e){ collections = []; }
+  render();
+}
+
+async function saveItems(){
+  try{
+    await window.storage.set('archive-items', JSON.stringify(items));
+  }catch(e){ showToast('تعذر الحفظ، حاول مجددا'); }
+}
+
+async function saveCollections(){
+  try{
+    await window.storage.set('archive-collections', JSON.stringify(collections));
+  }catch(e){ showToast('تعذر حفظ القوائم'); }
+}
+
+async function addItem(){
+  const url = document.getElementById('inUrl').value.trim();
+  if(!url){ showToast('الصق رابط أولا'); return; }
+  const typeSel = document.getElementById('inType').value;
+  const type = typeSel === 'auto' ? detectType(url) : typeSel;
+  const title = document.getElementById('inTitle').value.trim() || 'بدون عنوان';
+  const item = {
+    id: 'm' + Date.now() + Math.floor(Math.random()*1000),
+    url, type, title,
+    favorite: false,
+    collections: [],
+    createdAt: Date.now()
+  };
+  items.unshift(item);
+  document.getElementById('inUrl').value = '';
+  document.getElementById('inTitle').value = '';
+  await saveItems();
+  render();
+  showToast('تم الحفظ في الأرشيف');
+}
+
+async function toggleFav(id){
+  const it = items.find(i=>i.id===id);
+  if(!it) return;
+  it.favorite = !it.favorite;
+  await saveItems();
+  render();
+}
+
+async function deleteItem(id){
+  items = items.filter(i=>i.id!==id);
+  await saveItems();
+  render();
+  showToast('تم الحذف');
+}
+
+function openCollectionModal(id){
+  modalItemId = id;
+  renderColList();
+  document.getElementById('collectionModal').classList.add('open');
+}
+function closeModal(){
+  document.getElementById('collectionModal').classList.remove('open');
+  modalItemId = null;
+  render();
+}
+
+function renderColList(){
+  const wrap = document.getElementById('colList');
+  wrap.innerHTML = '';
+  const it = items.find(i=>i.id===modalItemId);
+  if(!it) return;
+  if(collections.length === 0){
+    wrap.innerHTML = '<p style="color:var(--ink-faint);font-family:sans-serif;font-size:13px;">لا توجد قوائم بعد.</p>';
+  }
+  collections.forEach(col=>{
+    const row = document.createElement('div');
+    row.className = 'col-item';
+    const checked = it.collections.includes(col) ? 'checked' : '';
+    row.innerHTML = `<input type="checkbox" ${checked} data-col="${col}"> <span>${col}</span>`;
+    row.querySelector('input').addEventListener('change', async (e)=>{
+      if(e.target.checked){
+        if(!it.collections.includes(col)) it.collections.push(col);
+      }else{
+        it.collections = it.collections.filter(c=>c!==col);
+      }
+      await saveItems();
+    });
+    wrap.appendChild(row);
+  });
+}
+
+async function createCollectionAndAdd(){
+  const name = document.getElementById('newColName').value.trim();
+  if(!name) return;
+  if(!collections.includes(name)) collections.push(name);
+  const it = items.find(i=>i.id===modalItemId);
+  if(it && !it.collections.includes(name)) it.collections.push(name);
+  document.getElementById('newColName').value = '';
+  await saveCollections();
+  await saveItems();
+  renderColList();
+  renderFilterChips();
+  showToast('تم إنشاء القائمة');
+}
+
+async function createStandaloneCollection(){
+  const name = prompt('اسم القائمة الجديدة:');
+  if(!name || !name.trim()) return;
+  const clean = name.trim();
+  if(!collections.includes(clean)) collections.push(clean);
+  await saveCollections();
+  renderFilterChips();
+  showToast('تم إنشاء القائمة: ' + clean);
+}
+
+function renderFilterChips(){
+  const wrap = document.getElementById('filterChips');
+  wrap.innerHTML = `
+    <button class="chip ${activeFilter==='all'?'active':''}" data-filter="all">الكل</button>
+    <button class="chip ${activeFilter==='fav'?'active':''}" data-filter="fav">المفضلة</button>
+  `;
+  collections.forEach(col=>{
+    const b = document.createElement('button');
+    b.className = 'chip' + (activeFilter===col ? ' active' : '');
+    b.textContent = col;
+    b.dataset.filter = col;
+    wrap.appendChild(b);
+  });
+  wrap.querySelectorAll('.chip').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      activeFilter = chip.dataset.filter;
+      render();
+    });
+  });
+}
+
+function render(){
+  document.getElementById('statTotal').textContent = items.length;
+  document.getElementById('statFav').textContent = items.filter(i=>i.favorite).length;
+  document.getElementById('statCol').textContent = collections.length;
+  renderFilterChips();
+
+  let list = items;
+  if(activeFilter === 'fav') list = list.filter(i=>i.favorite);
+  else if(activeFilter !== 'all') list = list.filter(i=>i.collections.includes(activeFilter));
+  if(searchTerm) list = list.filter(i=>i.title.toLowerCase().includes(searchTerm.toLowerCase()));
+
+  const area = document.getElementById('gridArea');
+  if(list.length === 0){
+    area.innerHTML = `<div class="empty"><h3>لا شيء هنا بعد</h3><p>الصق رابط صورة أو فيديو من kie.ai فوق لحفظه بشكل دائم.</p></div>`;
+    return;
+  }
+
+  const grid = document.createElement('div');
+  grid.className = 'grid';
+  list.forEach(it=>{
+    const card = document.createElement('div');
+    card.className = 'card';
+    const media = it.type === 'video'
+      ? `<video src="${it.url}" muted loop onmouseover="this.play()" onmouseout="this.pause()"></video>`
+      : `<img src="${it.url}" loading="lazy" alt="">`;
+    card.innerHTML = `
+      <div class="thumb">
+        ${media}
+        <button class="fav-btn ${it.favorite?'active':''}" title="مفضلة">★</button>
+      </div>
+      <div class="card-body">
+        <div class="card-title">${it.title}</div>
+        <div class="card-tags">${it.collections.map(c=>`<span class="tag">${c}</span>`).join('')}</div>
+        <div class="card-actions">
+          <button class="btn-open">فتح</button>
+          <button class="btn-col">قوائم</button>
+          <button class="icon-del btn-del">حذف</button>
+        </div>
+      </div>
+    `;
+    card.querySelector('.fav-btn').addEventListener('click', ()=>toggleFav(it.id));
+    card.querySelector('.btn-open').addEventListener('click', ()=>window.open(it.url,'_blank'));
+    card.querySelector('.btn-col').addEventListener('click', ()=>openCollectionModal(it.id));
+    card.querySelector('.btn-del').addEventListener('click', ()=>{
+      if(confirm('حذف هذا العنصر من الأرشيف؟')) deleteItem(it.id);
+    });
+    grid.appendChild(card);
+  });
+  area.innerHTML = '';
+  area.appendChild(grid);
+}
+
+document.getElementById('btnAdd').addEventListener('click', addItem);
+document.getElementById('inUrl').addEventListener('keydown', e=>{ if(e.key==='Enter') addItem(); });
+document.getElementById('searchBox').addEventListener('input', e=>{ searchTerm = e.target.value; render(); });
+document.getElementById('btnNewCollection').addEventListener('click', createStandaloneCollection);
+document.getElementById('btnCreateCol').addEventListener('click', createCollectionAndAdd);
+document.getElementById('btnCloseModal').addEventListener('click', closeModal);
+document.getElementById('collectionModal').addEventListener('click', e=>{
+  if(e.target.id === 'collectionModal') closeModal();
+});
+
+loadData();
+</script>
+</body>
+</html>
